@@ -50,15 +50,20 @@ html, body { margin: 0; }
 body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45; }
 .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 56px; display: flex; flex-direction: column; gap: 32px; }
 /* Encabezado: marquesina de cine, siempre oscura, con bombillas arriba y tira de carteles abajo. */
-header { position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px; padding: 46px 28px 34px; border-radius: 16px; border: 1px solid #2e3348; color: #eceef6; background: radial-gradient(120% 150% at 50% 0%, #2a2e47 0%, #171a29 55%, #11131d 100%); box-shadow: 0 14px 30px -16px rgba(17, 19, 29, .6); }
+header { position: relative; z-index: 5; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px; padding: 46px 28px 34px; border-radius: 16px; border: 1px solid #2e3348; color: #eceef6; background: radial-gradient(120% 150% at 50% 0%, #2a2e47 0%, #171a29 55%, #11131d 100%); box-shadow: 0 14px 30px -16px rgba(17, 19, 29, .6); }
 header::before { content: ""; position: absolute; left: 22px; right: 22px; top: 15px; height: 12px; background: radial-gradient(circle, #ffd772 0 3px, rgba(255, 215, 114, .32) 4px, transparent 6px) 0 0 / 28px 12px space no-repeat; background-repeat: space no-repeat; animation: bombillas 2.6s ease-in-out infinite alternate; }
-header::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px; background: linear-gradient(90deg, #b8233a 0 12.5%, #c9862b 0 25%, #2f5fa8 0 37.5%, #2c8a55 0 50%, #7a3fb0 0 62.5%, #b59a2a 0 75%, #2a8a99 0 87.5%, #b03a6a 0); }
+header::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px; border-radius: 0 0 15px 15px; background: linear-gradient(90deg, #b8233a 0 12.5%, #c9862b 0 25%, #2f5fa8 0 37.5%, #2c8a55 0 50%, #7a3fb0 0 62.5%, #b59a2a 0 75%, #2a8a99 0 87.5%, #b03a6a 0); }
 @keyframes bombillas { from { opacity: 1; } to { opacity: .55; } }
 h1 { font-family: var(--display); font-weight: 400; font-size: clamp(3rem, 11vw, 5.6rem); line-height: .88; margin: 0; letter-spacing: .02em; color: #eceef6; text-wrap: balance; }
 h1 span { color: #ff5d72; text-shadow: 0 0 26px rgba(255, 93, 114, .35); }
 .tagline { margin: 10px 0 0; color: #a0a6bd; max-width: 46ch; }
 header #buscar { background: rgba(255, 255, 255, .07); border-color: #3a405a; color: #eceef6; border-radius: 99px; padding: 10px 18px; }
 header #buscar::placeholder { color: #a0a6bd; }
+.busca { position: relative; width: min(320px, 100%); }
+header #buscar { width: 100%; }
+#sug { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20; margin: 0; padding: 6px; list-style: none; max-height: 330px; overflow: auto; background: #1b1e2d; border: 1px solid #3a405a; border-radius: 12px; box-shadow: 0 14px 30px rgba(0, 0, 0, .5); }
+#sug li { padding: 8px 12px; border-radius: 8px; cursor: pointer; color: #eceef6; font-size: .95rem; line-height: 1.25; }
+#sug li:hover, #sug li[aria-selected="true"] { background: #ff5d72; color: #1a0a0e; }
 header #buscar:focus-visible { outline: 2px solid #ffd772; outline-offset: 2px; border-color: #ffd772; }
 @media (max-width: 480px) { header { padding: 42px 18px 28px; border-radius: 12px; } }
 h2 { font-family: var(--display); font-weight: 400; font-size: 1.9rem; letter-spacing: .03em; margin: 0; text-wrap: balance; }
@@ -75,6 +80,8 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 button.small { padding: 4px 10px; font-size: .82rem; border-color: var(--line); color: var(--muted); }
 button.filtro { font-size: .88rem; padding: 6px 12px; color: var(--ink); }
 button.filtro[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+button.filtro-orden { font-size: .88rem; padding: 6px 12px; color: var(--marquee); border-color: var(--marquee); margin-left: 6px; }
+button.filtro-orden[aria-pressed="true"] { background: var(--marquee); color: var(--bg); }
 button:hover { filter: brightness(1.08); }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 20px 18px; align-items: start; }
@@ -124,7 +131,10 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
       <h1>Cartelera <span>en casa</span></h1>
       <p class="tagline">Tus enlaces a películas en español, en un solo sitio.</p>
     </div>
-    <input type="search" id="buscar" placeholder="Buscar por título o web" aria-label="Buscar por título o web">
+    <div class="busca">
+      <input type="search" id="buscar" placeholder="Buscar por título o web" aria-label="Buscar por título o web" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sug" aria-expanded="false">
+      <ul id="sug" role="listbox" aria-label="Títulos que coinciden" hidden></ul>
+    </div>
   </header>
 
   <section aria-labelledby="h-mias">
@@ -254,7 +264,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
   DIBUJOS.b = DIBUJOS.d;
   // Películas de otras categorías que también son en blanco y negro
   var BN = { "El halcón maltés": 1, "El sueño eterno": 1, "Winchester 73": 1, "Nosferatu": 1, "La noche de los muertos vivientes": 1, "Cabeza borradora": 1 };
-  var filtro = "";
+  var filtro = "", ordenAZ = false;
   var pelis = [];
   var memoria = false;
 
@@ -349,6 +359,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
     function casa(p) { return !q || (p.titulo + " " + web(p.url) + " " + (p.anio || "") + " " + (p.etq || "")).toLowerCase().indexOf(q) !== -1; }
     var gc = $("grid-cat"); gc.textContent = "";
     var cv = CATALOGO.filter(function (p) { return (!filtro || p.cat === filtro || (filtro === "b" && BN[p.titulo])) && casa(p); });
+    if (ordenAZ) cv.sort(function (a, b) { return a.titulo.localeCompare(b.titulo, "es", { sensitivity: "base", ignorePunctuation: true, numeric: true }); });
     cv.forEach(function (p) { gc.appendChild(tarjeta(p, false)); });
     $("n-cat").textContent = cv.length;
     $("vacio-cat").style.display = cv.length ? "none" : "block";
@@ -392,6 +403,49 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
     }, function () { $("b-msg").textContent = "No se pudo leer esa imagen. Prueba con un JPG o PNG."; });
   });
   $("buscar").addEventListener("input", pintar);
+  // Desplegable de sugerencias: desde dos letras, títulos que empiezan igual (y después los que tienen una palabra que empieza igual)
+  (function () {
+    var caja = $("buscar"), sug = $("sug"), sel = -1;
+    function nrm(t) { return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/^[^a-z0-9]+/, ""); }
+    function cerrar() { sug.hidden = true; sel = -1; caja.setAttribute("aria-expanded", "false"); }
+    function elegir(t) { caja.value = t; cerrar(); pintar(); }
+    function marcar(i) {
+      var li = sug.children; if (!li.length) return;
+      sel = (i + li.length) % li.length;
+      Array.prototype.forEach.call(li, function (x, k) { x.setAttribute("aria-selected", k === sel ? "true" : "false"); });
+      li[sel].scrollIntoView({ block: "nearest" });
+    }
+    function sugerir() {
+      var q = nrm(caja.value.trim()); sug.textContent = ""; sel = -1;
+      if (q.length < 2) { cerrar(); return; }
+      var visto = {}, a = [], b = [];
+      CATALOGO.concat(pelis).forEach(function (p) {
+        if (visto[p.titulo]) return;
+        var n = nrm(p.titulo);
+        if (n.indexOf(q) === 0) { visto[p.titulo] = 1; a.push(p.titulo); }
+        else if ((" " + n).indexOf(" " + q) !== -1) { visto[p.titulo] = 1; b.push(p.titulo); }
+      });
+      function cmp(x, y) { return x.localeCompare(y, "es", { sensitivity: "base" }); }
+      var l = a.sort(cmp).concat(b.sort(cmp)).slice(0, 8);
+      if (!l.length || (l.length === 1 && nrm(l[0]) === q)) { cerrar(); return; }
+      l.forEach(function (t) {
+        var li = el("li", "", t); li.setAttribute("role", "option"); li.setAttribute("aria-selected", "false");
+        li.addEventListener("mousedown", function (e) { e.preventDefault(); elegir(t); });
+        sug.appendChild(li);
+      });
+      sug.hidden = false; caja.setAttribute("aria-expanded", "true");
+    }
+    caja.addEventListener("input", sugerir);
+    caja.addEventListener("focus", sugerir);
+    caja.addEventListener("blur", function () { setTimeout(cerrar, 120); });
+    caja.addEventListener("keydown", function (e) {
+      if (sug.hidden) return;
+      if (e.key === "ArrowDown") { e.preventDefault(); marcar(sel + 1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); marcar(sel - 1); }
+      else if (e.key === "Enter" && sel >= 0) { e.preventDefault(); elegir(sug.children[sel].textContent); }
+      else if (e.key === "Escape") { cerrar(); }
+    });
+  })();
   $("btn-nueva").addEventListener("click", function () { $("form").classList.add("open"); $("f-titulo").focus(); });
   $("btn-cancelar").addEventListener("click", function () { $("form").reset(); $("f-msg").textContent = ""; $("form").classList.remove("open"); });
   $("form").addEventListener("submit", function (ev) {
@@ -448,6 +502,11 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
     });
     $("filtros").appendChild(b);
   });
+  (function () {
+    var b = el("button", "small filtro-orden", "Ordenar A–Z"); b.type = "button"; b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", function () { ordenAZ = !ordenAZ; b.setAttribute("aria-pressed", ordenAZ ? "true" : "false"); pintar(); });
+    $("filtros").appendChild(b);
+  })();
   cargar(); cargarImgs();
   if (memoria) $("b-msg").textContent = "Este navegador no permite guardar la lista: se perderá al cerrar la página.";
   pintar();

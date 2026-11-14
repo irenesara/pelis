@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartelera en casa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Idea: una cartelera de cine. Rejilla de carteles 2:3 con el título debajo; rojo telón para acciones, ámbar de marquesina para etiquetas. */
+:root {
+  --bg: #eceef3;
+  --surface: #ffffff;
+  --ink: #171a2a;
+  --muted: #5b6078;
+  --line: #d3d7e2;
+  --accent: #b8233a;
+  --accent-ink: #ffffff;
+  --marquee: #8a5a00;
+  --marquee-bg: #ffe9b0;
+  --display: "Bebas Neue", "Arial Narrow", Impact, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11131d; --surface: #1b1e2d; --ink: #eceef6; --muted: #a0a6bd; --line: #2e3348;
+    --accent: #ff5d72; --accent-ink: #1a0a0e; --marquee: #ffd772; --marquee-bg: #3a2f10;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11131d; --surface: #1b1e2d; --ink: #eceef6; --muted: #a0a6bd; --line: #2e3348;
+  --accent: #ff5d72; --accent-ink: #1a0a0e; --marquee: #ffd772; --marquee-bg: #3a2f10;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 56px; display: flex; flex-direction: column; gap: 32px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; border-bottom: 3px solid var(--ink); padding-bottom: 14px; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.6rem, 8vw, 4.2rem); line-height: .9; margin: 0; letter-spacing: .02em; }
+h1 span { color: var(--accent); }
+.tagline { margin: 6px 0 0; color: var(--muted); max-width: 46ch; }
+h2 { font-family: var(--display); font-weight: 400; font-size: 1.9rem; letter-spacing: .03em; margin: 0; text-wrap: balance; }
+.sec-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.sec-note { color: var(--muted); margin: 4px 0 0; font-size: .93rem; max-width: 65ch; }
+.count { font-size: .85rem; font-weight: 600; color: var(--marquee); background: var(--marquee-bg); padding: 2px 9px; border-radius: 99px; margin-left: 8px; font-family: var(--body); letter-spacing: 0; vertical-align: middle; font-variant-numeric: tabular-nums; }
+input[type="search"], input[type="text"], input[type="url"], textarea {
+  font: inherit; color: var(--ink); background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 12px; width: 100%;
+}
+textarea { min-height: 90px; font-size: .85rem; }
+#buscar { width: min(320px, 100%); }
+button, .btn { font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 9px 16px; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+button.small { padding: 4px 10px; font-size: .82rem; border-color: var(--line); color: var(--muted); }
+button.filtro { font-size: .88rem; padding: 6px 12px; color: var(--ink); }
+button.filtro[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+button:hover { filter: brightness(1.08); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 20px 18px; align-items: start; }
+.card { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card a.poster-link { display: block; border-radius: 6px; text-decoration: none; }
+.poster { aspect-ratio: 2 / 3; width: 100%; border-radius: 6px; overflow: hidden; background: var(--line); display: flex; align-items: flex-end; box-shadow: 0 2px 0 var(--ink); transition: transform .15s; }
+a.poster-link:hover .poster { transform: translateY(-3px); }
+.poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.poster.gen { flex-direction: column; align-items: stretch; color: #fff; }
+.poster.gen .dibujo { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 10px 10px 0; }
+.poster.gen .dibujo svg { width: 100%; height: 100%; max-height: 100%; }
+.poster.gen .rotulo { padding: 6px 10px 10px; font-family: var(--display); font-size: 1.25rem; line-height: 1; letter-spacing: .03em; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.card .txt { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.card.mini { flex-direction: row; align-items: flex-start; gap: 10px; }
+.card.mini .poster-link { flex: 0 0 46px; }
+.card.mini .poster { box-shadow: none; border-radius: 5px; }
+.card.mini .poster.gen .rotulo { display: none; }
+.card.mini .poster.gen .dibujo { padding: 5px; }
+.card .title { font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; color: var(--ink); text-decoration: none; }
+.card .title:hover { text-decoration: underline; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .8rem; color: var(--muted); }
+.chip { color: var(--marquee); background: var(--marquee-bg); border-radius: 4px; padding: 1px 6px; font-weight: 600; overflow-wrap: anywhere; }
+.card .desc { font-size: .84rem; color: var(--muted); margin: 0; }
+.empty { border: 2px dashed var(--line); border-radius: 10px; padding: 22px; color: var(--muted); }
+.panel { background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 18px; display: none; margin-bottom: 18px; }
+.panel.open { display: block; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid .full { grid-column: 1 / -1; }
+label { display: flex; flex-direction: column; gap: 5px; font-size: .88rem; font-weight: 600; }
+label small { font-weight: 400; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.msg { font-size: .88rem; color: var(--accent); min-height: 1.2em; margin: 0; }
+footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 16px; display: flex; flex-direction: column; gap: 12px; }
+@media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .poster { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Cartelera <span>en casa</span></h1>
+      <p class="tagline">Tus enlaces a películas en español, con su cartel y su título, en un solo sitio.</p>
+    </div>
+    <input type="search" id="buscar" placeholder="Buscar por título o web" aria-label="Buscar por título o web">
+  </header>
+
+  <section aria-labelledby="h-mias">
+    <div class="sec-head">
+      <h2 id="h-mias">Mis películas <span class="count" id="n-mias">0</span></h2>
+      <button class="primary" id="btn-nueva" type="button">Añadir película</button>
+    </div>
+    <form class="panel" id="form" novalidate>
+      <div class="form-grid">
+        <label for="f-titulo">Título
+          <input type="text" id="f-titulo" maxlength="120" placeholder="Ej.: El verdugo" required>
+        </label>
+        <label for="f-anio">Año <small>opcional</small>
+          <input type="text" id="f-anio" inputmode="numeric" maxlength="4" placeholder="1963">
+        </label>
+        <label for="f-url" class="full">Enlace a la película
+          <input type="url" id="f-url" placeholder="https://www.rtve.es/play/videos/..." required>
+        </label>
+        <label for="f-img" class="full">Imagen del cartel <small>opcional. Elige una imagen guardada en tu dispositivo; si no pones ninguna, se crea un cartel con las iniciales.</small>
+          <input type="file" id="f-img" accept="image/*">
+        </label>
+      </div>
+      <p class="msg" id="f-msg" role="status"></p>
+      <div class="actions">
+        <button class="primary" type="submit">Guardar película</button>
+        <button type="button" id="btn-cancelar">Cancelar</button>
+      </div>
+    </form>
+    <div class="grid" id="grid-mias"></div>
+    <div class="empty" id="vacio">Aún no has añadido ninguna película. Pulsa «Añadir película», pega el enlace y ponle título y cartel. Abajo tienes webs gratuitas y legales donde encontrarlas.</div>
+  </section>
+
+  <section aria-labelledby="h-cat">
+    <div class="sec-head">
+      <div>
+        <h2 id="h-cat">Catálogo <span class="count" id="n-cat">0</span></h2>
+        <p class="sec-note">Películas gratis en RTVE Play, la plataforma de la televisión pública. Lista tomada de su sección de cine el 14 de noviembre de 2026: RTVE añade y retira títulos, y para verlas pide una cuenta gratuita.</p>
+      </div>
+      <div class="actions" id="filtros" role="group" aria-label="Filtrar el catálogo"></div>
+    </div>
+    <input type="file" id="f-cat" accept="image/*" hidden aria-label="Imagen para la película del catálogo">
+    <div class="grid" id="grid-cat"></div>
+    <div class="empty" id="vacio-cat" style="display:none">Ninguna película del catálogo coincide con la búsqueda.</div>
+  </section>
+
+  <section aria-labelledby="h-fuentes">
+    <div class="sec-head">
+      <div>
+        <h2 id="h-fuentes">Más webs con cine gratis</h2>
+        <p class="sec-note">Webs gratuitas y legales con películas en español. Abre una, busca la película y copia su enlace para añadirla arriba.</p>
+      </div>
+    </div>
+    <div class="grid" id="grid-fuentes"></div>
+  </section>
+
+  <footer>
+    <div>Tu lista se guarda solo en este navegador. Para no perderla o pasarla a otro dispositivo, copia una copia de seguridad y pégala allí.</div>
+    <div class="actions">
+      <button type="button" id="btn-copiar">Copiar copia de seguridad</button>
+      <button type="button" id="btn-importar">Restaurar una copia</button>
+      <span class="msg" id="b-msg" role="status"></span>
+    </div>
+    <div class="panel" id="panel-importar">
+      <label for="t-importar">Pega aquí la copia de seguridad
+        <textarea id="t-importar"></textarea>
+      </label>
+      <div class="actions" style="margin-top:12px">
+        <button class="primary" type="button" id="btn-restaurar">Restaurar lista</button>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var CLAVE = "cartelera-en-casa-v1";
+  var FUENTES = [
+    { titulo: "RTVE Play · Cine", url: "https://www.rtve.es/play/cine/", desc: "Cine español gratis de la televisión pública (sección Somos Cine)." },
+    { titulo: "Pluto TV", url: "https://pluto.tv/", desc: "Películas a la carta y canales de cine, gratis con anuncios." },
+    { titulo: "Rakuten TV", url: "https://www.rakuten.tv/es", desc: "Tiene una sección gratuita con anuncios. Filtra por «Gratis»." },
+    { titulo: "Plex", url: "https://watch.plex.tv/", desc: "Películas gratis con anuncios, sin suscripción." },
+    { titulo: "eFilm", url: "https://efilm.online/", desc: "Préstamo gratuito de películas con el carné de tu biblioteca pública." },
+    { titulo: "Internet Archive", url: "https://archive.org/details/feature_films", desc: "Cine clásico en dominio público." }
+  ];
+  var CATS = { s: "Cine español", i: "Internacional", d: "Clásicos", c: "Cine de autor" };
+  var CARPETA = { s: "somos-cine", i: "cine-internacional", d: "cine-de-siempre", c: "cine-club-play" };
+  // "categoría|ruta|título" — enlaces de rtve.es/play/cine/ leídos el 14-11-2026
+  var CATALOGO = [
+"s|47/17307558|El 47","s|miocardio/17306826|Miocardio","s|sicarius-noche-silencio/5835831|Sicarius, la noche y el silencio","s|quiero-imbecil/6237881|Te quiero, imbécil","s|somos-cine-dia-perfecto/5550674|Un día perfecto","s|mujer-fantastica/5550345|Una mujer fantástica","s|matar-tiempo/5668128|Matar el tiempo","s|akelarre/17285331|Akelarre","s|kepler-sexto-b/17272568|Kepler Sexto B","s|libertad/6991804|Libertad","s|sentimental/6663413|Sentimental","s|fin-fiesta/17283208|Fin de fiesta","s|proyecto-lazaro/5722713|Proyecto Lázaro","s|doble-mas-quince/16945752|El doble más quince","s|feedback/5917972|Feedback","s|sustituto/15960272|El sustituto","s|hija-ladron/6051280|La hija de un ladrón","s|lado-oscuro/5897014|El lado oscuro","s|dispararon-pianista/17234868|Dispararon al pianista","s|cerca-tu-casa/5591309|Cerca de tu casa","s|abuela-forastero/17223751|La abuela y el forastero","s|llamada/5945752|La llamada","s|somos-cine-truman/5642067|Truman","s|extorsion/17186350|La extorsión","s|as-bestas/16243381|As bestas","s|verano-diciembre/17181145|Verano en diciembre","s|20000-especies-abejas/16642558|20.000 especies de abejas","s|somos-cine-tarde-para-ira/5670811|Tarde para la ira","s|maria-demas/5550341|María (y los demás)","s|segundo-premio/16973702|Segundo premio","s|isla-bonita/5618486|Isla bonita","s|loli-tormenta/16591683|Loli Tormenta","s|amor/16923086|Un amor","s|hate-songs/17194175|Hate songs","s|buen-patron/6907904|El buen patrón","s|casa/17106125|La casa","s|somos-cine-felices-140/5646143|Felices 140","s|adios/6272036|Adiós","s|pequenos-amores/17042717|Los pequeños amores","s|cinco-lobitos/16211472|Cinco lobitos","s|calladita/17073327|Calladita","s|somos-cine-casa-entre-cactus/16533181|La casa entre los cactus","s|alcarras/16106354|Alcarràs","s|campeones/5751723|Campeones","s|robot-dreams/16793458|Robot dreams","s|boda-rosa/6626262|La boda de Rosa","s|maestro-prometio-mar/16717917|El maestro que prometió el mar","s|somos-cine-competencia-oficial/16490825|Competencia oficial","s|estrella-azul/16955566|La estrella azul","s|ninas/6529895|Las niñas","s|chavalas/6982152|Chavalas","s|somos-cine-girasoles-silvestres/16480631|Girasoles silvestres","s|arde/6115285|Lo que arde","s|somos-cine-matria/16430035|Matria","s|chinas/16887669|Chinas","s|mamifera/17024708|Mamífera","s|verano-1993/5926719|Verano 1993","s|loving-pablo/6079949|Loving Pablo","s|ternura/16864328|La ternura","s|cerdita/16254110|Cerdita","s|maternal/16262707|La maternal","s|erase-vez-euskadi/16906033|Érase una vez en Euskadi","s|esperando-dali/16945812|Esperando a Dalí","s|solos-noche/16944153|Solos en la noche","s|corno/16815504|O corno","s|els-encantats/16763360|Els encantats","s|cambio-nada/6433818|A cambio de nada",
+"d|lute-i-camina-revienta/6696337|El Lute I. Camina o revienta","d|perro-del-hortelano/5828748|El perro del hortelano","d|historia-nuestro-cine-historias-television/3985238|Historias de la televisión","d|braveheart/16124646|Braveheart","d|halcon-maltes/17303794|El halcón maltés","d|adictos-amor/16521233|Adictos al amor","d|boda-mejor-amigo/16894410|La boda de mi mejor amigo","d|winchester-73/16093221|Winchester 73","d|sueno-eterno/17287300|El sueño eterno","d|hora-bruja/17286292|La hora bruja","d|tienes-email/5564561|Tienes un e-mail","d|viven/16919375|¡Viven!","d|vida-brian/16804468|La vida de Brian",
+"i|blanco-facil/16961775|Un blanco fácil","i|yo-tonya/17099107|Yo, Tonya","i|colores-incendio/17299885|Los colores del incendio","i|pareja-tres/17301130|Una pareja de tres","i|gran-boda-griega/16815580|Mi gran boda griega","i|guillermo-tell/17302645|Guillermo Tell","i|sweet-home-alabama/7001805|Sweet home Alabama","i|arthur/17287098|Arthur","i|arte-vivir-bajo-lluvia/16560763|El arte de vivir bajo la lluvia","i|orgullo-prejuicio/6084961|Orgullo y prejuicio","i|duquesa/16921326|La duquesa","i|fallen-leaves/17274397|Fallen leaves","i|aguas-oscuras/6565161|Aguas oscuras","i|spotlight/16976423|Spotlight","i|querido-john/17266837|Querido John","i|matronas/17267549|Matronas","i|vicio-poder/16850426|El vicio del poder","i|50-50/16846684|50/50","i|villa-toscana/17256144|Una villa en la Toscana","i|tentacion-manhattan/5914871|Tentación en Manhattan","i|nada-perder/16681262|Nada que perder","i|golpe-suerte/17226719|Golpe de suerte","i|bonita-manana/16708294|Una bonita mañana","i|scrapper/17245538|Scrapper","i|ocho-montanas/16751992|Las ocho montañas","i|hija-del-rey/17210755|La hija del rey","i|todo-vez-todas-partes/16994723|Todo a la vez en todas partes","i|anatomia-caida/16892875|Anatomía de una caída","i|scarlet/17200972|Scarlet","i|gaza-mon-amour/17146451|Gaza mon amour","i|cine-2-caftan-azul/16639424|El caftán azul","i|amal/17138166|Amal","i|harka/17075335|Harka","i|stella-victima-culpable/17095846|Stella. Víctima y culpable","i|sala-profesores/17024452|Sala de profesores","i|cuando-termine-guerra/16954676|Cuando termine la guerra","i|vidas-pasadas/16912237|Vidas pasadas","i|sol-futuro/16884688|El sol del futuro",
+"c|otra-ronda/6803462|Otra ronda","c|parasitos/5943841|Parásitos","c|acontecimiento/16014941|El acontecimiento","c|caso-collini/6772246|El caso Collini","c|cronica-asesino-serie/5895090|Crónica de un asesino en serie","c|doncella/6104904|La Doncella","c|gran-enfermedad-amor/6234103|La gran enfermedad del amor","c|the-guilty/16857057|The guilty","c|vida-demas/6777243|La vida de los demás","c|peor-persona-mundo/15955982|La peor persona del mundo","c|miserables/6496760|Los miserables","c|retrato-mujer-llamas/6548510|Retrato de una mujer en llamas","c|maudie-color-vida/5747813|Maudie, el color de la vida","c|drive-my-car/6990573|Drive my car","c|anton-amigo-revolucion-rusa/6479734|Antón, su amigo y la revolución rusa","c|cafarnaum/16854638|Cafarnaúm","c|contra/6972323|Contra","c|girl/6623269|Girl","c|i-am-woman/16855860|I am woman","c|martin-eden/6724466|Martin Eden","c|vida-amanda/6247783|Mi vida con Amanda","c|reina-corazones/6666413|Reina de corazones","c|bolsa-canicas/16858811|Una bolsa de canicas","c|cine-profesor-persa/6777183|El profesor de persa","c|sombra-del-pasado/5727037|La sombra del pasado"
+  ].map(function (l) { var p = l.split("|"); return { titulo: p[2], cat: p[0], etq: CATS[p[0]], url: "https://www.rtve.es/play/videos/" + CARPETA[p[0]] + "/" + p[1] + "/" }; });
+  // Gama de color por categoría: [tono base, variación, saturación]
+  var GAMA = { s: [350, 45, 62], i: [185, 45, 50], d: [28, 18, 30], c: [270, 50, 42] };
+  // Ilustraciones propias: sol y campos, globo, bobina de cine, ojo, estrella
+  var DIBUJOS = {
+    s: '<g fill="#fff"><circle cx="50" cy="40" r="15" opacity=".92"/><g stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".7"><path d="M50 14v7M24 40h-7M83 40h-7M31 21l5 5M69 21l-5 5"/></g><path d="M0 76Q25 54 50 70T100 64V100H0Z" opacity=".35"/><path d="M0 88Q30 70 60 84T100 80V100H0Z" opacity=".6"/></g>',
+    i: '<g fill="none" stroke="#fff" stroke-width="2.5" opacity=".9"><circle cx="50" cy="50" r="30"/><ellipse cx="50" cy="50" rx="13" ry="30"/><path d="M20 50H80M24 35H76M24 65H76"/></g>',
+    d: '<g fill="none" stroke="#fff" stroke-width="3" opacity=".9"><circle cx="50" cy="48" r="30"/><circle cx="50" cy="48" r="4" fill="#fff"/><circle cx="50" cy="30" r="7"/><circle cx="67" cy="42.5" r="7"/><circle cx="60.6" cy="62.6" r="7"/><circle cx="39.4" cy="62.6" r="7"/><circle cx="33" cy="42.5" r="7"/><path d="M50 78Q75 84 97 74" stroke-linecap="round"/></g>',
+    c: '<g fill="none" stroke="#fff" stroke-width="3" opacity=".9"><path d="M12 50Q50 14 88 50Q50 86 12 50Z"/><circle cx="50" cy="50" r="14"/><circle cx="50" cy="50" r="5" fill="#fff"/></g>',
+    x: '<polygon points="50,18 59,40 83,42 65,58 71,82 50,69 29,82 35,58 17,42 41,40" fill="#fff" opacity=".88"/>'
+  };
+  var filtro = "";
+  var pelis = [];
+  var memoria = false;
+
+  function $(id) { return document.getElementById(id); }
+  function cargar() {
+    try { var t = localStorage.getItem(CLAVE); if (t) pelis = limpiar(JSON.parse(t)); }
+    catch (e) { memoria = true; }
+  }
+  function guardar() {
+    try { localStorage.setItem(CLAVE, JSON.stringify(pelis)); return true; }
+    catch (e) { return false; }
+  }
+  var imgs = {}, destino = "", CLAVE_IMGS = "cartelera-en-casa-imgs-v1";
+  function cargarImgs() { try { var t = localStorage.getItem(CLAVE_IMGS); if (t) imgs = limpiarImgs(JSON.parse(t)); } catch (e) {} }
+  function guardarImgs() { try { localStorage.setItem(CLAVE_IMGS, JSON.stringify(imgs)); return true; } catch (e) { return false; } }
+  function limpiarImgs(o) {
+    var r = {}; if (!o || typeof o !== "object") return r;
+    Object.keys(o).forEach(function (k) { if (typeof o[k] === "string" && o[k].indexOf("data:image/") === 0) r[k] = o[k]; });
+    return r;
+  }
+  function urlValida(u) {
+    try { var x = new URL(u); return x.protocol === "http:" || x.protocol === "https:"; } catch (e) { return false; }
+  }
+  function limpiar(lista) {
+    if (!Array.isArray(lista)) return [];
+    return lista.filter(function (p) { return p && typeof p.titulo === "string" && urlValida(p.url); }).map(function (p) {
+      return {
+        id: String(p.id || Date.now() + Math.random()),
+        titulo: p.titulo.slice(0, 120),
+        url: p.url,
+        anio: /^\d{4}$/.test(p.anio || "") ? p.anio : "",
+        img: typeof p.img === "string" && p.img.indexOf("data:image/") === 0 ? p.img : ""
+      };
+    });
+  }
+  function web(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } }
+  function tono(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360; return h; }
+  function iniciales(s) {
+    var p = s.replace(/[·:,.]/g, " ").trim().split(/\s+/).filter(function (w) { return w.length > 2 || /\d/.test(w); });
+    if (!p.length) p = s.trim().split(/\s+/);
+    return p.slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join("");
+  }
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+
+  function tarjeta(p, esMia) {
+    var c = el("article", "card");
+    var a = el("a", "poster-link"); a.href = p.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+    a.setAttribute("aria-label", "Abrir " + p.titulo);
+    var pos = el("div", "poster");
+    var foto = p.img || (p.cat ? imgs[p.url] : "");
+    if (foto) { var im = el("img"); im.src = foto; im.alt = ""; pos.appendChild(im); }
+    else {
+      var h = tono(p.titulo), g = GAMA[p.cat], ton = g ? g[0] + h % g[1] : h, sat = g ? g[2] : 48;
+      pos.className = "poster gen";
+      pos.style.background = "linear-gradient(" + (140 + h % 50) + "deg, hsl(" + ton + " " + sat + "% " + (38 + h % 8) + "%), hsl(" + ((ton + 25) % 360) + " " + (sat + 8) + "% 20%))";
+      var dib = el("div", "dibujo");
+      dib.innerHTML = '<svg viewBox="0 0 100 100" aria-hidden="true">' + (DIBUJOS[p.cat] || DIBUJOS.x) + "</svg>";
+      dib.firstChild.style.transform = "rotate(" + ((h % 5) - 2) * 6 + "deg) scale(" + (0.82 + (h % 4) * 0.07) + ")";
+      pos.appendChild(dib);
+      var rot = el("div", "rotulo", p.titulo); rot.setAttribute("aria-hidden", "true"); pos.appendChild(rot);
+    }
+    if (!foto) c.className = "card mini";
+    var caja = el("div", "txt");
+    a.appendChild(pos); c.appendChild(a);
+    var t = el("a", "title", p.titulo); t.href = p.url; t.target = "_blank"; t.rel = "noopener noreferrer"; caja.appendChild(t);
+    if (p.desc) caja.appendChild(el("p", "desc", p.desc));
+    var m = el("div", "meta");
+    if (p.anio) m.appendChild(el("span", "", p.anio));
+    m.appendChild(el("span", "chip", p.etq || web(p.url)));
+    if (esMia) {
+      var b = el("button", "small", "Quitar"); b.type = "button";
+      b.addEventListener("click", function () {
+        if (b.dataset.seguro) { pelis = pelis.filter(function (x) { return x.id !== p.id; }); guardar(); pintar(); }
+        else { b.dataset.seguro = "1"; b.textContent = "¿Seguro? Quitar"; setTimeout(function () { delete b.dataset.seguro; b.textContent = "Quitar"; }, 3000); }
+      });
+      m.appendChild(b);
+    }
+    if (p.cat) {
+      var bi = el("button", "small", imgs[p.url] ? "Quitar imagen" : "Poner imagen"); bi.type = "button";
+      bi.addEventListener("click", function () {
+        if (imgs[p.url]) { delete imgs[p.url]; guardarImgs(); pintar(); }
+        else { destino = p.url; $("f-cat").value = ""; $("f-cat").click(); }
+      });
+      m.appendChild(bi);
+    }
+    caja.appendChild(m); c.appendChild(caja);
+    return c;
+  }
+
+  function pintar() {
+    var q = $("buscar").value.trim().toLowerCase();
+    function casa(p) { return !q || (p.titulo + " " + web(p.url) + " " + (p.anio || "") + " " + (p.etq || "")).toLowerCase().indexOf(q) !== -1; }
+    var gc = $("grid-cat"); gc.textContent = "";
+    var cv = CATALOGO.filter(function (p) { return (!filtro || p.cat === filtro) && casa(p); });
+    cv.forEach(function (p) { gc.appendChild(tarjeta(p, false)); });
+    $("n-cat").textContent = cv.length;
+    $("vacio-cat").style.display = cv.length ? "none" : "block";
+    var gm = $("grid-mias"); gm.textContent = "";
+    var vis = pelis.filter(casa);
+    vis.forEach(function (p) { gm.appendChild(tarjeta(p, true)); });
+    $("n-mias").textContent = pelis.length;
+    var v = $("vacio");
+    v.style.display = vis.length ? "none" : "block";
+    if (pelis.length && !vis.length) v.textContent = "Ninguna de tus películas coincide con «" + $("buscar").value.trim() + "».";
+    else if (!pelis.length) v.textContent = "Aún no has añadido ninguna película. Pulsa «Añadir película», pega el enlace y ponle título y cartel. Abajo tienes webs gratuitas y legales donde encontrarlas.";
+    var gf = $("grid-fuentes"); gf.textContent = "";
+    FUENTES.filter(casa).forEach(function (f) { gf.appendChild(tarjeta(f, false)); });
+  }
+
+  function reducir(file) {
+    return new Promise(function (ok, mal) {
+      var r = new FileReader();
+      r.onerror = mal;
+      r.onload = function () {
+        var im = new Image();
+        im.onerror = mal;
+        im.onload = function () {
+          var W = 240, H = 360, c = document.createElement("canvas"); c.width = W; c.height = H;
+          var s = Math.max(W / im.width, H / im.height), w = im.width * s, h = im.height * s;
+          c.getContext("2d").drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
+          ok(c.toDataURL("image/jpeg", 0.72));
+        };
+        im.src = r.result;
+      };
+      r.readAsDataURL(file);
+    });
+  }
+
+  $("f-cat").addEventListener("change", function () {
+    var f = $("f-cat").files[0], url = destino; if (!f || !url) return;
+    reducir(f).then(function (d) {
+      imgs[url] = d;
+      $("b-msg").textContent = guardarImgs() ? "" : "La imagen se ve ahora, pero no queda espacio para guardarla en este navegador.";
+      pintar();
+    }, function () { $("b-msg").textContent = "No se pudo leer esa imagen. Prueba con un JPG o PNG."; });
+  });
+  $("buscar").addEventListener("input", pintar);
+  $("btn-nueva").addEventListener("click", function () { $("form").classList.add("open"); $("f-titulo").focus(); });
+  $("btn-cancelar").addEventListener("click", function () { $("form").reset(); $("f-msg").textContent = ""; $("form").classList.remove("open"); });
+  $("form").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var titulo = $("f-titulo").value.trim(), url = $("f-url").value.trim(), anio = $("f-anio").value.trim(), msg = $("f-msg");
+    if (!titulo) { msg.textContent = "Escribe el título de la película."; $("f-titulo").focus(); return; }
+    if (!urlValida(url)) { msg.textContent = "El enlace debe empezar por https:// o http://. Cópialo entero desde la barra del navegador."; $("f-url").focus(); return; }
+    if (anio && !/^\d{4}$/.test(anio)) { msg.textContent = "El año debe tener cuatro cifras, o déjalo vacío."; $("f-anio").focus(); return; }
+    var f = $("f-img").files[0];
+    var paso = f ? reducir(f).catch(function () { return null; }) : Promise.resolve("");
+    paso.then(function (img) {
+      if (img === null) { msg.textContent = "No se pudo leer esa imagen. Prueba con un JPG o PNG."; return; }
+      pelis.unshift({ id: String(Date.now()), titulo: titulo, url: url, anio: anio, img: img });
+      if (!guardar() && !memoria) {
+        if (img) { pelis[0].img = ""; if (guardar()) { msg.textContent = ""; fin("Guardada sin imagen: no queda espacio para más carteles en este navegador."); return; } }
+      }
+      fin("");
+    });
+    function fin(aviso) { $("form").reset(); $("form").classList.remove("open"); $("b-msg").textContent = aviso; $("buscar").value = ""; pintar(); }
+  });
+
+  $("btn-copiar").addEventListener("click", function () {
+    var m = $("b-msg");
+    if (!pelis.length && !Object.keys(imgs).length) { m.textContent = "Todavía no hay nada que copiar."; return; }
+    var txt = JSON.stringify({ pelis: pelis, imgs: imgs });
+    try {
+      navigator.clipboard.writeText(txt).then(function () { m.textContent = "Copia de seguridad copiada. Pégala en una nota para guardarla."; },
+        function () { mostrar(); });
+    } catch (e) { mostrar(); }
+    function mostrar() { $("panel-importar").classList.add("open"); $("t-importar").value = txt; $("t-importar").select(); m.textContent = "No se pudo copiar automáticamente. Copia el texto del recuadro."; }
+  });
+  $("btn-importar").addEventListener("click", function () { $("panel-importar").classList.toggle("open"); $("t-importar").value = ""; });
+  $("btn-restaurar").addEventListener("click", function () {
+    var m = $("b-msg"), nuevas;
+    var ni = {};
+    try { var dato = JSON.parse($("t-importar").value); nuevas = limpiar(Array.isArray(dato) ? dato : dato.pelis); ni = limpiarImgs(dato.imgs); } catch (e) { nuevas = []; }
+    Object.keys(ni).forEach(function (k) { imgs[k] = ni[k]; });
+    if (Object.keys(ni).length) guardarImgs();
+    if (!nuevas.length && Object.keys(ni).length) { pintar(); $("panel-importar").classList.remove("open"); m.textContent = "Imágenes restauradas."; return; }
+    if (!nuevas.length) { m.textContent = "Ese texto no es una copia de seguridad válida. Pega el texto completo que copiaste."; return; }
+    var ya = {}; pelis.forEach(function (p) { ya[p.url] = 1; });
+    var add = nuevas.filter(function (p) { return !ya[p.url]; });
+    pelis = pelis.concat(add); guardar(); pintar();
+    $("panel-importar").classList.remove("open");
+    m.textContent = add.length + (add.length === 1 ? " película restaurada." : " películas restauradas.");
+  });
+
+  [["", "Todas"], ["s", CATS.s], ["i", CATS.i], ["d", CATS.d], ["c", CATS.c]].forEach(function (f) {
+    var b = el("button", "small filtro", f[1]); b.type = "button"; b.setAttribute("aria-pressed", f[0] === "" ? "true" : "false");
+    b.addEventListener("click", function () {
+      filtro = f[0];
+      Array.prototype.forEach.call(document.querySelectorAll(".filtro"), function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      pintar();
+    });
+    $("filtros").appendChild(b);
+  });
+  cargar(); cargarImgs();
+  if (memoria) $("b-msg").textContent = "Este navegador no permite guardar la lista: se perderá al cerrar la página.";
+  pintar();
+})();
+</script>
+</body>
+</html>

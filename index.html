@@ -4,6 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cartelera en casa</title>
+<meta name="description" content="Películas en español, con su cartel y su título, en un solo sitio.">
+<!-- Vista previa al compartir (WhatsApp, etc.). Cambia TU-USUARIO y TU-REPOSITORIO por los tuyos. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cartelera en casa">
+<meta property="og:description" content="Películas en español, con su cartel y su título, en un solo sitio.">
+<meta property="og:url" content="https://TU-USUARIO.github.io/TU-REPOSITORIO/">
+<meta property="og:image" content="https://TU-USUARIO.github.io/TU-REPOSITORIO/vista-previa.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -39,10 +49,18 @@
 html, body { margin: 0; }
 body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45; }
 .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 56px; display: flex; flex-direction: column; gap: 32px; }
-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; border-bottom: 3px solid var(--ink); padding-bottom: 14px; }
-h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.6rem, 8vw, 4.2rem); line-height: .9; margin: 0; letter-spacing: .02em; }
-h1 span { color: var(--accent); }
-.tagline { margin: 6px 0 0; color: var(--muted); max-width: 46ch; }
+/* Encabezado: marquesina de cine, siempre oscura, con bombillas arriba y tira de carteles abajo. */
+header { position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px; padding: 46px 28px 34px; border-radius: 16px; border: 1px solid #2e3348; color: #eceef6; background: radial-gradient(120% 150% at 50% 0%, #2a2e47 0%, #171a29 55%, #11131d 100%); box-shadow: 0 14px 30px -16px rgba(17, 19, 29, .6); }
+header::before { content: ""; position: absolute; left: 22px; right: 22px; top: 15px; height: 12px; background: radial-gradient(circle, #ffd772 0 3px, rgba(255, 215, 114, .32) 4px, transparent 6px) 0 0 / 28px 12px space no-repeat; background-repeat: space no-repeat; animation: bombillas 2.6s ease-in-out infinite alternate; }
+header::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px; background: linear-gradient(90deg, #b8233a 0 12.5%, #c9862b 0 25%, #2f5fa8 0 37.5%, #2c8a55 0 50%, #7a3fb0 0 62.5%, #b59a2a 0 75%, #2a8a99 0 87.5%, #b03a6a 0); }
+@keyframes bombillas { from { opacity: 1; } to { opacity: .55; } }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(3rem, 11vw, 5.6rem); line-height: .88; margin: 0; letter-spacing: .02em; color: #eceef6; text-wrap: balance; }
+h1 span { color: #ff5d72; text-shadow: 0 0 26px rgba(255, 93, 114, .35); }
+.tagline { margin: 10px 0 0; color: #a0a6bd; max-width: 46ch; }
+header #buscar { background: rgba(255, 255, 255, .07); border-color: #3a405a; color: #eceef6; border-radius: 99px; padding: 10px 18px; }
+header #buscar::placeholder { color: #a0a6bd; }
+header #buscar:focus-visible { outline: 2px solid #ffd772; outline-offset: 2px; border-color: #ffd772; }
+@media (max-width: 480px) { header { padding: 42px 18px 28px; border-radius: 12px; } }
 h2 { font-family: var(--display); font-weight: 400; font-size: 1.9rem; letter-spacing: .03em; margin: 0; text-wrap: balance; }
 .sec-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .sec-note { color: var(--muted); margin: 4px 0 0; font-size: .93rem; max-width: 65ch; }
@@ -91,7 +109,7 @@ label small { font-weight: 400; color: var(--muted); }
 .msg { font-size: .88rem; color: var(--accent); min-height: 1.2em; margin: 0; }
 footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 16px; display: flex; flex-direction: column; gap: 12px; }
 @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
-@media (prefers-reduced-motion: reduce) { .poster { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .poster { transition: none; } header::before { animation: none; } }
 </style>
 </head>
 <body>
